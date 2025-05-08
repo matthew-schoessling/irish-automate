@@ -18,6 +18,7 @@ import * as dotenv from "dotenv";
 import ExcelJS from 'exceljs';
 import configData from '../../assets/config.json';
 import { Opportunity, CustomField, Option, Person } from '../helpers/types';
+import { stringify } from 'querystring';
 
 dotenv.config();
 
@@ -56,7 +57,9 @@ ipcMain.handle('read-one-pager', async (
     onePagerPath = path.join(process.resourcesPath, 'assets', 'One-Pager_template.xlsx');
   }
   const os = require('os');
-  const onePagerWritePath = path.join(os.homedir(), 'New-One-Pager_template.xlsx');
+  const today = new Date();
+  const mmddyy = `${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}${String(today.getFullYear()).slice(-2)}`;
+  const onePagerWritePath = path.join(os.homedir(), `${selectedOpportunity.company_name}-${mmddyy}.xlsx`);
 
   const wb = new ExcelJS.Workbook();
   await wb.xlsx.readFile(onePagerPath);
@@ -78,9 +81,9 @@ ipcMain.handle('read-one-pager', async (
   // Export Copper custom fields to excel output 
   for (const customField of selectedOpportunity.custom_fields) {
     const customFieldConfigData = customFieldsDict[customField.custom_field_definition_id];
-
-    if (!(customFieldConfigData.name in configData.custom_opp_fields))
-      continue
+console.log('')
+    if (!customFieldConfigData || !(customFieldConfigData.name in configData.custom_opp_fields))
+      continue;
     const excelInfo = configData.custom_opp_fields[customFieldConfigData.name as keyof object]
     const optionsDict = customFieldConfigData.options?.reduce((acc, opt) => {
       acc[opt.id] = opt;
@@ -118,7 +121,7 @@ ipcMain.handle('read-one-pager', async (
         continue;
       
       var cell = wb.getWorksheet(excelInfo['sheet'])?.getCell(excelInfo['cell']);
-      var newDropdownValue: string = optionsDict[customField.value].name;
+      var newDropdownValue: string = optionsDict[customField.value]?.name ?? "";
       
       if (cell)
         cell.value = newDropdownValue;

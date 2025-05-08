@@ -55,3 +55,9 @@ export interface Email {
     email: string;
     category: string;
 }
+
+export interface Coinvestor {
+    id: number;
+    name: string;
+    custom_fields: OpportunityCustomField[];
+}

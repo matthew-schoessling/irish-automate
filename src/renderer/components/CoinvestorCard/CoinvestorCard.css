@@ -1,0 +1,29 @@
+.coinvestor-card-container {
+    flex: 0 0 auto;
+    width: 320px;
+    height: 160px;
+    margin: 5px 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .2);  
+    border-radius: 12px; 
+    padding: 20px;
+}
+
+.card-header-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(12, 35, 64, 0.2);
+    padding: 10px;
+}
+
+.card-header {
+    font-size: 20px;
+    font-weight: 300;
+    color: #0C2340;
+}
+
+.star-header {
+    font-size: 16px;
+    font-weight: 300;
+    color: #ae9142;
+}

@@ -1,0 +1,26 @@
+.coinvestor-container {
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(12, 35, 64, .75);    
+    padding: 2vw;
+    width: 86vw;
+    margin: 2vh auto;
+}
+
+.coinvestor-header {
+    font-size: 25px;
+    font-weight: 600;
+    color: #0C2340;
+    border-bottom: 1px solid rgba(12, 35, 64, 0.2);
+    padding-bottom: 10px;
+    margin-bottom: 2vh;
+} 
+
+.coinvestor-list-container {
+    padding: 2px;
+    height: 30vh;
+    width: 86vw;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    overflow-x: auto;
+}

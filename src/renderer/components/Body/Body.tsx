@@ -10,7 +10,7 @@ function Body(){
     const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity>();
     const [stage, setStage] = useState<Stage>();
     const [industry, setIndustry] = useState<string>('');
-    const [customFieldsDict, setCustomFieldsDict] = useState<Record<number, CustomField>>();
+    const [customFieldsDict, setCustomFieldsDict] = useState<Record<number, CustomField>>({});
     const [contact, setContact] = useState<Person>();
 
     useEffect(() => {
@@ -36,12 +36,12 @@ function Body(){
                 console.log('Error: ', error);
             }
         }
-
-        if (customFieldsDict === undefined)
+        
+        if (Object.keys(customFieldsDict).length === 0)
             fetchData()
     });
 
-    const coinvestorRatingsOptions = customFieldsDict ? customFieldsDict[648777].options : [];
+    const coinvestorRatingsOptions = customFieldsDict ? customFieldsDict[648777]?.options : [];
 
     return(
         <div className="body-class">
@@ -59,7 +59,14 @@ function Body(){
                 stage={stage}
                 industry={industry}
             />
-            <CoinvestorList coinvestorRatingsOptions={coinvestorRatingsOptions || []} />
+            { selectedOpportunity
+                ? <CoinvestorList 
+                    coinvestorRatingsOptions={coinvestorRatingsOptions || []}
+                    selectedOpportunity={selectedOpportunity} 
+                    customFieldsDict={customFieldsDict}
+                />
+                : ''
+            }   
         </div>
     );
 };

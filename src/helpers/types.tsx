@@ -60,4 +60,14 @@ export interface Coinvestor {
     id: number;
     name: string;
     custom_fields: OpportunityCustomField[];
+    opportunityMatchRank: number;
+    assignee_id: number;
+    matchingCriteria: string[];
+    nonmatchingCriteria: string[];
+}
+
+export interface User {
+    id: number,
+    name: string,
+    email: string
 }

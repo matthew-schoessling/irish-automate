@@ -9,7 +9,7 @@ interface SelectorExportContainerProps {
     setIndustry: React.Dispatch<React.SetStateAction<string>>;
     setContact: React.Dispatch<React.SetStateAction<Person | undefined>>;
     selectedOpportunity: Opportunity | undefined;
-    customFieldsDict: Record<number, CustomField> | undefined;
+    customFieldsDict: Record<number, CustomField>;
     contact: Person | undefined;
 }
 

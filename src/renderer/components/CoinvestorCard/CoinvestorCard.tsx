@@ -22,8 +22,12 @@ function CoinvestorCard({coinvestor, rankCustomField, coinvestorRatingsOptions}:
                 <div className="star-header">
                     {stars}
                 </div>
-                {/* Need Primary Contact, Number of Contacts, and check list of good things and x list of bad, maybe owner? */}
             </div>
+            <label>Opportunity Match Rank</label>
+            <div>{coinvestor.opportunityMatchRank}</div>
+            <div><label>Matches: </label>{coinvestor.matchingCriteria.join(', ')}</div>
+            <div><label>Missing: </label>{coinvestor.nonmatchingCriteria.join(', ')}</div>
+            {/* Need Primary Contact, Number of Contacts, and check list of good things and x list of bad, maybe owner? */}
         </div>
     )
 }

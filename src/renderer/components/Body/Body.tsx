@@ -39,7 +39,7 @@ function Body(){
         
         if (Object.keys(customFieldsDict).length === 0)
             fetchData()
-    });
+    }, []);
 
     const coinvestorRatingsOptions = customFieldsDict ? customFieldsDict[648777]?.options : [];
 
@@ -59,14 +59,11 @@ function Body(){
                 stage={stage}
                 industry={industry}
             />
-            { selectedOpportunity
-                ? <CoinvestorList 
+            <CoinvestorList 
                     coinvestorRatingsOptions={coinvestorRatingsOptions || []}
                     selectedOpportunity={selectedOpportunity} 
                     customFieldsDict={customFieldsDict}
-                />
-                : ''
-            }   
+            />
         </div>
     );
 };

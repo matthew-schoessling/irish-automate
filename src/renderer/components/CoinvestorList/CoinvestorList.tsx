@@ -13,7 +13,8 @@ interface CoinvestorListProps {
 function CoinvestorList({coinvestorRatingsOptions, selectedOpportunity, customFieldsDict}: CoinvestorListProps) {
     const [coinvestors, setCoinvestors] = useState<Coinvestor[]>([]);
     const [users, setUsers] = useState<User[]>([]);
-    const industries = customFieldsDict[648465].options;
+    const industries = customFieldsDict[648465]?.options;
+    let pauseRender = false;
 
     useEffect(() => {
         const fetchCoinvestorData = async () => {
@@ -74,6 +75,7 @@ function CoinvestorList({coinvestorRatingsOptions, selectedOpportunity, customFi
     }, [])
 
     useEffect(() => {
+        pauseRender = true;
         // If selected opportunity is undefined, return as we can't re-rank the coinvestors
         if (selectedOpportunity == undefined)
             return;
@@ -161,8 +163,10 @@ function CoinvestorList({coinvestorRatingsOptions, selectedOpportunity, customFi
                 }
             })
         );
+        pauseRender = false;
     }, [selectedOpportunity]);
 
+    if (!selectedOpportunity || pauseRender) return null;
 
     return (
         <div className="coinvestor-container">

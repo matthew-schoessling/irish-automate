@@ -10,20 +10,117 @@
 
 .card-header-container {
     display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid rgba(12, 35, 64, 0.2);
+    padding: 5px;
+    margin-bottom: 1.5vh;
+}
+
+.title-star-container {
+    display: flex;
     flex-direction: row;
     justify-content: space-between;
-    border-bottom: 1px solid rgba(12, 35, 64, 0.2);
-    padding: 10px;
+}
+
+.description-title {
+    position: relative;
+    display: inline-block;
+} 
+
+.description {
+    font-size: 13px;
+    color: rgb(75, 75, 75);
+    padding: 2px;
+    height: 75px;
+
+    /* This is all needed to hide this over 2 lines */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+}
+
+.tooltip {
+  visibility: hidden;
+  font-size: 12px;
+  background-color: rgb(75,75,75);
+  color: #fff;
+  padding: 8px;
+  border-radius: 4px;
+  position: absolute;
+  z-index: 9999;
+  width: 345px;
+  top: 125%;
+  left: -25px;
+}
+
+/* Add triangle arrow */
+.tooltip::before {
+    content: "";
+    position: absolute;
+    top: -20px; /* Position it right above the tooltip */
+    left: 175px; /* Adjust horizontally as needed */
+    border-width: 10px;
+    border-style: solid;
+    border-color: transparent transparent rgb(75, 75, 75) transparent;
+}
+
+.description-title:hover .tooltip {
+  visibility: visible;
 }
 
 .card-header {
     font-size: 20px;
     font-weight: 300;
     color: #0C2340;
+    white-space: nowrap;
+    overflow-x: scroll;
+}
+
+.card-header:hover {
+    cursor: pointer;
+}
+
+.card-header::-webkit-scrollbar {
+    display: none;
 }
 
 .star-header {
     font-size: 16px;
     font-weight: 300;
     color: #ae9142;
+    padding-left: 10px;
+}
+
+.matches {
+    color: green;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow-x: auto;
+}
+
+.matches::-webkit-scrollbar {
+    display: none;
+}
+
+.nonmatches {
+    color: red;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow-x: auto;
+}
+
+.nonmatches::-webkit-scrollbar {
+    display: none;
+}
+
+.contacts {
+    font-size: 14px;
+    white-space: nowrap;
+    overflow-x: auto;
+}
+
+.contacts::-webkit-scrollbar {
+    display: none;
 }

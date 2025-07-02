@@ -1,7 +1,7 @@
 import './SelectorExportContainer.css';
 import OpportunitySelector from '../OpportunitySelector/OpportunitySelector';
 import ExportButton from '../ExportButton/ExportButton';
-import { Opportunity, Stage, Person, CustomField } from '../../../helpers/types';
+import { Opportunity, Stage, Person, CustomField, Option } from '../../../helpers/types';
 
 interface SelectorExportContainerProps {
     setSelectedOpportunity: React.Dispatch<React.SetStateAction<Opportunity | undefined>>;
@@ -11,6 +11,7 @@ interface SelectorExportContainerProps {
     selectedOpportunity: Opportunity | undefined;
     customFieldsDict: Record<number, CustomField>;
     contact: Person | undefined;
+    industryOptions: Option[];
 }
 
 function SelectorExportContainer({
@@ -20,7 +21,8 @@ function SelectorExportContainer({
     setContact,
     selectedOpportunity,
     customFieldsDict,
-    contact
+    contact,
+    industryOptions
 } : SelectorExportContainerProps) {
 
     return (
@@ -30,6 +32,7 @@ function SelectorExportContainer({
                 setStage={setStage}
                 setIndustry={setIndustry}
                 setContact={setContact}
+                industryOptions={industryOptions}
             />
             <ExportButton
                 selectedOpportunity={selectedOpportunity}

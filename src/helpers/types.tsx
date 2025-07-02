@@ -3,7 +3,7 @@ export interface SelectOption {
     label: string;
 }
 
-export interface OpportunityCustomField {
+export interface EntityCustomField {
     custom_field_definition_id: number;
     value: any;
 }
@@ -26,11 +26,12 @@ export interface CustomField {
 
 export interface Opportunity {
     id: number;
+    name: string;
     company_name: string;
     details: string;
     pipeline_stage_id: number;
     primary_contact_id: number;
-    custom_fields: OpportunityCustomField[];
+    custom_fields: EntityCustomField[];
 }
 
 export interface Stage {
@@ -38,17 +39,14 @@ export interface Stage {
     name: string;
 }
 
-export interface Industry {
-    id: number;
-    name: string;
-    rank: number;
-}
-
 export interface Person {
     id: number;
+    company_id: number;
     name: string;
-    emails: Email[];
     email: string;
+    interaction_count: number,
+    date_last_contacted: number,
+    emails: Email[];
 }
 
 export interface Email {
@@ -59,11 +57,13 @@ export interface Email {
 export interface Coinvestor {
     id: number;
     name: string;
-    custom_fields: OpportunityCustomField[];
+    custom_fields: EntityCustomField[];
     opportunityMatchRank: number;
     assignee_id: number;
     matchingCriteria: string[];
     nonmatchingCriteria: string[];
+    details: string;
+    contacts: Person[];
 }
 
 export interface User {

@@ -59,7 +59,7 @@ ipcMain.handle('read-one-pager', async (
   const os = require('os');
   const today = new Date();
   const mmddyy = `${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}${String(today.getFullYear()).slice(-2)}`;
-  const onePagerWritePath = path.join(os.homedir(), `${selectedOpportunity.company_name}-${mmddyy}.xlsx`);
+  const onePagerWritePath = path.join(os.homedir(), `${selectedOpportunity.name}-${mmddyy}.xlsx`);
 
   const wb = new ExcelJS.Workbook();
   await wb.xlsx.readFile(onePagerPath);

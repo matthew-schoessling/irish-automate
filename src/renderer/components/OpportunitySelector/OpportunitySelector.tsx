@@ -1,31 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import Select from 'react-select';
 import { baseUrl, headers} from '../../../helpers/constants';
-import { SelectOption, Opportunity, Person, OpportunityCustomField, CustomField, Stage, Industry } from '../../../helpers/types';
+import { SelectOption, Opportunity, Person, EntityCustomField, CustomField, Stage, Option } from '../../../helpers/types';
+import { findContactEmail, getIndustries } from '../../../helpers/methods';
 
 interface OpportunitySelectorProps {
     setSelectedOpportunity: React.Dispatch<React.SetStateAction<Opportunity | undefined>>;
     setStage: React.Dispatch<React.SetStateAction<Stage | undefined>>;
     setIndustry: React.Dispatch<React.SetStateAction<string>>;
     setContact: React.Dispatch<React.SetStateAction<Person | undefined>>;
+    industryOptions: Option[];
 }
 
 function OpportunitySelector({
     setSelectedOpportunity,
     setStage, 
     setIndustry,
-    setContact
+    setContact,
+    industryOptions
 }: OpportunitySelectorProps){
     const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
     const [selectOpps, setSelectOpps] = useState<SelectOption[]>([]);
     const [stages, setStages] = useState<Stage[]>([]);
-    const [industries, setIndustries] = useState<Industry[]>([]);
 
     useEffect(() => {
         const fetchData = async () => {
             const listOpportunitiesUrl = baseUrl + 'opportunities/search';
             const apiStageUrl = `${baseUrl}/pipeline_stages`;
-            const apiIndustriesUrl = `${baseUrl}/custom_field_definitions/648465`;
             let allCompanies: Opportunity[] = [];
             // No efficient way to get total opportunities in Copper, so use a total pages that is much greater than actual amount total pages
             const totalPages = 50;
@@ -43,23 +44,16 @@ function OpportunitySelector({
                     method: 'GET',
                     headers: headers
                 });
-
-                const industriesResponse = await fetch(apiIndustriesUrl, {
-                    method: 'GET',
-                    headers: headers
-                });
             
                 const results = await Promise.all(requests);
                 
                 const companies: Opportunity[] = results.flatMap((result) => 
-                    result.map((opp: Opportunity) => ({ id: opp.id, company_name: opp.company_name })) // returning Opportunity objects
+                    result.map((opp: Opportunity) => ({ id: opp.id, company_name: opp.company_name, name: opp.name })) // returning Opportunity objects
                 ).filter(opp => opp.company_name != null);
                 const stageData = await stageResponse.json();
-                const industriesData = await industriesResponse.json();
                 setOpportunities(companies);
-                setSelectOpps(companies.map(opp => ({value: opp.id, label: opp.company_name})))
+                setSelectOpps(companies.map(opp => ({value: opp.id, label: opp.name})))
                 setStages(stageData);
-                setIndustries(industriesData.options);
             } catch (error) {
                 console.log('Error: ', error);
             }
@@ -101,12 +95,11 @@ function OpportunitySelector({
 
         setSelectedOpportunity(data);
         setStage(stages?.find(stage => stage.id == data.pipeline_stage_id));
-        const oppsIndustryIds = data.custom_fields.find((cf: OpportunityCustomField) => cf.custom_field_definition_id == 648465)?.value;
-        setIndustry(oppsIndustryIds.map((id: number) => industries.find(ind => ind.id == id)?.name).join(', '));
+        const oppsIndustryIds = getIndustries(data.custom_fields, industryOptions);
+        setIndustry(oppsIndustryIds);
 
         // Find contact's work email or first email in their list
-        const workEmails = contactData.emails.filter(e => e.category == 'work');
-        contactData.email = workEmails.length > 0 ? workEmails[0].email : contactData.emails[0]?.email;
+        contactData.email = findContactEmail(contactData.emails);
         setContact(contactData);
         
         } catch (error) {

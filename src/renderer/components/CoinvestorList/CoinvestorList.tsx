@@ -1,25 +1,42 @@
 import { useState, useEffect } from 'react'; 
 import './CoinvestorList.css';
 import { baseUrl, headers} from '../../../helpers/constants';
-import { Coinvestor, Option, Opportunity, User, CustomField } from '../../../helpers/types';
+import { Coinvestor, Option, Opportunity, User, CustomField, Person } from '../../../helpers/types';
+import { findContactEmail } from '../../../helpers/methods';
 import CoinvestorCard from '../CoinvestorCard/CoinvestorCard';
 
 interface CoinvestorListProps {
     coinvestorRatingsOptions: Option[];
     selectedOpportunity: Opportunity | undefined;
-    customFieldsDict: Record<number, CustomField>;
+    opportunityStagesOfInvestment: number[];
+    opportunityGeographicalFocus: number[];
+    stageOfInvestmentOptions: Option[];
+    geographicalFocusOptions: Option[];
+    industryOptions: Option[];
+    setEmailList: React.Dispatch<React.SetStateAction<Person[]>>;
+    emailList: Person[]
 }
 
-function CoinvestorList({coinvestorRatingsOptions, selectedOpportunity, customFieldsDict}: CoinvestorListProps) {
+function CoinvestorList({
+    coinvestorRatingsOptions, 
+    selectedOpportunity,
+    opportunityStagesOfInvestment, 
+    opportunityGeographicalFocus, 
+    stageOfInvestmentOptions, 
+    geographicalFocusOptions,
+    industryOptions,
+    setEmailList,
+    emailList
+}: CoinvestorListProps) {
     const [coinvestors, setCoinvestors] = useState<Coinvestor[]>([]);
     const [users, setUsers] = useState<User[]>([]);
-    const industries = customFieldsDict[648465]?.options;
     let pauseRender = false;
 
     useEffect(() => {
         const fetchCoinvestorData = async () => {
             const coinvestorUrl = baseUrl + '/companies/search';
             const userUrl = baseUrl + '/users/search';
+            const contactsUrl = baseUrl + '/people/search';
             // No efficient way to get total coinvestors in Copper, so use a total pages that is much greater than actual amount total pages
             const totalPages = 10;
 
@@ -47,10 +64,10 @@ function CoinvestorList({coinvestorRatingsOptions, selectedOpportunity, customFi
                         opportunityMatchRank: 0, 
                         assignee_id: ci.assignee_id,
                         matchingCriteria: [],
-                        nonmatchingCriteria: []
+                        nonmatchingCriteria: [],
+                        details: ci.details
                 })) // returning Coinvestor objects
                 ).filter(ci => ci.name != null);
-                setCoinvestors(companies);
                 
                 // Request for Current Users in Copper (IrishAngels team that has access to Copper)
                 const usersRequest = await fetch(userUrl, {
@@ -64,6 +81,36 @@ function CoinvestorList({coinvestorRatingsOptions, selectedOpportunity, customFi
 
                 const usersData = await usersRequest.json();
                 setUsers(usersData);
+
+                // Request for the contacts at the companies
+                const companyIds = companies.map(company => company.id);
+                const contactsRequest = Array.from({ length: totalPages*totalPages }, (_, i) =>
+                    fetch(contactsUrl, {
+                        method: "POST",
+                        headers: headers,
+                        body: JSON.stringify({
+                            page_number: i + 1,
+                            page_size: 200,
+                            company_ids: companyIds
+                        })
+                    }).then(res => res.json())
+                );
+
+                const contactsData = await Promise.all(contactsRequest);
+                const contacts: Person[] = contactsData.flatMap((result) => 
+                    result.map((contact: Person) => ({
+                        id: contact.id,
+                        company_id: contact.company_id,
+                        name: contact.name,
+                        email: findContactEmail(contact.emails),
+                        interaction_count: contact.interaction_count,
+                        date_last_contacted: contact.date_last_contacted
+                    }))
+                );
+                companies.forEach(company => {
+                    company.contacts = contacts.filter(contact => contact.company_id === company.id);
+                })
+                setCoinvestors(companies);
 
             } catch (error) {
                 console.log('Error: ', error);
@@ -127,29 +174,76 @@ function CoinvestorList({coinvestorRatingsOptions, selectedOpportunity, customFi
                     }
                 }
 
-                // If Stage of the Opportunity matches stages of coinvestor, +1 (hold off to check on Stage)
+                // If Stage of the Opportunity matches stages of coinvestor, +1
+                const coinvestorStages = c.custom_fields.find(cf => cf.custom_field_definition_id === 648461)?.value as number[];
 
-                // If Region of the Opportunity matches region focus of coinvestor, +1 (hold off to check in on region)
+                if (coinvestorStages) {
+                    // This variable will track if the coinvestor specifically doesn't invest in the region of the Opportunity
+                    var stageMatch = false;
+                    coinvestorStages.map((coinvestorStage: number) => {
+                        if (opportunityStagesOfInvestment.includes(coinvestorStage))
+                            stageMatch = true;
+                    })
+
+                    if (stageMatch){
+                        rank++;
+                        matchingCriteria.push("Stage of Investment");
+                    } else {
+                        nonmatchingCriteria.push("Stage of Investment");
+                    }
+                }
+
+                // If Region of the Opportunity matches region focus of coinvestor, +1
+                const coinvestorGeographicalFocuses = c.custom_fields.find(cf => cf.custom_field_definition_id === 648462)?.value as number[];
+
+                if (coinvestorGeographicalFocuses) {
+                    var antiRegionMatch = false;
+                    var regionMatch = false;
+                    coinvestorGeographicalFocuses.map((region: number) => {
+                        if (region === 1931247)
+                            regionMatch = true;
+                        // If coinvestor specified No Bay Area and the opportunity is in the bay area
+                        else if (region === 1931250 && opportunityGeographicalFocus.includes(2059887))
+                            antiRegionMatch = true;
+                        // If the coinvestor specified No Coasts, and the opportunity includes Bay Area, East Coast, or West Coast 
+                        else if (region === 1931251 && (opportunityGeographicalFocus.includes(2059887) || opportunityGeographicalFocus.includes(1931248) || opportunityGeographicalFocus.includes(1931244)))
+                            antiRegionMatch = true; 
+                    })
+                    if (regionMatch && !antiRegionMatch) {
+                        rank++;
+                        matchingCriteria.push("Geographical Focus");
+                    } else {
+                        nonmatchingCriteria.push("Geographical Focus");
+                    }
+                }
 
                 // Foreach industry matched between opportunity and coinvestor, +1
                 var listCoinvestorIndustries = c.custom_fields.find(cf => cf.custom_field_definition_id===648465)
                 var coinvestorIndustriesSet = new Set(listCoinvestorIndustries?.value)
 
                 if (coinvestorIndustriesSet.size !== 0) {
+                    if (c.name === "Pritzker Group") {
+                        console.log('yup in here');
+                    }
                     // If Coinvestor is agnostic, +1
                     if (coinvestorIndustriesSet.has(1931259)) {
+                        if (c.name === "Pritzker Group") {
+                            console.log(`yup in here and rank increasing from ${rank}`);
+                        }
                         rank++;
                         matchingCriteria.push("Agnostic");
                     }
 
                     // For every sector of the opportunity, if the Coinvestor is specifically experted in that sector, +1
                     oppIndustryExpertise?.value.map((oppIndustry: number) => {
-                        const industryName = industries?.find(i => i.id===oppIndustry)?.name;
-                        if (coinvestorIndustriesSet.has(oppIndustry)) {
-                            rank++;
-                            matchingCriteria.push(industryName);
-                        } else {
-                            nonmatchingCriteria.push(industryName);
+                        const industryName = industryOptions?.find(i => i.id===oppIndustry)?.name;
+                        if (oppIndustry != 1931259) {
+                            if (coinvestorIndustriesSet.has(oppIndustry)) {
+                                rank++;
+                                matchingCriteria.push(industryName);
+                            } else {
+                                nonmatchingCriteria.push(industryName);
+                            }
                         }
                     })
                 }
@@ -186,6 +280,12 @@ function CoinvestorList({coinvestorRatingsOptions, selectedOpportunity, customFi
                             coinvestor={coinvestor} 
                             rankCustomField={coinvestor.custom_fields?.find(cf => cf.custom_field_definition_id===648777)} 
                             coinvestorRatingsOptions={coinvestorRatingsOptions}
+                            stageOfInvestmentOptions={stageOfInvestmentOptions}
+                            geographicalFocusOptions={geographicalFocusOptions}
+                            industryOptions={industryOptions}
+                            setEmailList={setEmailList}
+                            emailList={emailList}
+                            owner={users.find(user => user.id === coinvestor.assignee_id)}
                         />
                     ))
                 }

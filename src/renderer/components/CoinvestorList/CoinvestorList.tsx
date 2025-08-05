@@ -12,6 +12,7 @@ interface CoinvestorListProps {
     opportunityGeographicalFocus: number[];
     stageOfInvestmentOptions: Option[];
     geographicalFocusOptions: Option[];
+    checkSizeOptions: Option[];
     industryOptions: Option[];
     setEmailList: React.Dispatch<React.SetStateAction<Person[]>>;
     emailList: Person[]
@@ -24,6 +25,7 @@ function CoinvestorList({
     opportunityGeographicalFocus, 
     stageOfInvestmentOptions, 
     geographicalFocusOptions,
+    checkSizeOptions,
     industryOptions,
     setEmailList,
     emailList
@@ -65,9 +67,13 @@ function CoinvestorList({
                         assignee_id: ci.assignee_id,
                         matchingCriteria: [],
                         nonmatchingCriteria: [],
-                        details: ci.details
-                })) // returning Coinvestor objects
-                ).filter(ci => ci.name != null);
+                        details: ci.details,
+                        rankingId: ci.custom_fields.find(field => field.custom_field_definition_id === 648777)?.value as number
+                }))
+                ).filter(ci => ci.name !== null && ci.rankingId !== null)
+                // 1931712 = 4 stars, ..., 1931709 = 1 star. We sort so that 4 stars show up in list first
+                .sort((a,b) => b.rankingId - a.rankingId);
+                console.log(companies)
                 
                 // Request for Current Users in Copper (IrishAngels team that has access to Copper)
                 const usersRequest = await fetch(userUrl, {
@@ -147,10 +153,10 @@ function CoinvestorList({
                 }
                 
                 // If Round Size of the Opportunity falls within a range of the coinvestor, +1
-                const checkSizes = c.custom_fields.find(cf => cf.custom_field_definition_id === 648463)
+                const coinvestorCheckSizes = c.custom_fields.find(cf => cf.custom_field_definition_id === 648463)
 
-                if (checkSizes?.value && oppRoundSize) {
-                    const csList = checkSizes.value as number[];
+                if (coinvestorCheckSizes?.value && oppRoundSize?.value) {
+                    const csList = coinvestorCheckSizes.value as number[];
                     if (typeof csList === 'object')
                     {
                         csList.map((cs: number) => {
@@ -286,6 +292,7 @@ function CoinvestorList({
                             setEmailList={setEmailList}
                             emailList={emailList}
                             owner={users.find(user => user.id === coinvestor.assignee_id)}
+                            checkSizeOptions={checkSizeOptions}
                         />
                     ))
                 }

@@ -64,6 +64,7 @@ export interface Coinvestor {
     nonmatchingCriteria: string[];
     details: string;
     contacts: Person[];
+    rankingId: number | null;
 }
 
 export interface User {

@@ -19,7 +19,8 @@ function OpportunityInfo({
 }: OpportunityInfoProps) {
     var stagesOfInvestment = stagesOfInvestmentDisplay(selectedOpportunity?.custom_fields ?? [], stageOfInvestmentOptions);
     var geographicalFocus = geographicalFocusDisplay(selectedOpportunity?.custom_fields ?? [], geographicalFocusOptions);
-
+    const oppRoundSize = selectedOpportunity?.custom_fields.find(cf => cf.custom_field_definition_id===666330)
+    
     return (
         <div className="opp-card-container">
           <div className="opportunity-header">
@@ -40,6 +41,15 @@ function OpportunityInfo({
 
             <div className="opportunity-label">Industries:</div>
             <div className="opportunity-value">{industry}</div>
+
+            <div className="opportunity-label">Round Size:</div>
+            <div className="opportunity-value">
+                {oppRoundSize?.value?.toLocaleString('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                    maximumFractionDigits: 0,
+                })}
+            </div>
           </div>
         </div>
     );

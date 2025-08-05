@@ -56,6 +56,9 @@ function Body(){
     // 648465 is the id for the "Industry" field that exists on both Opportunity and Company in Copper
     const industryOptions = customFieldsDict ? customFieldsDict[648465]?.options : [];
 
+    // 648463 is the id for "Check Size ($)" field that exists on both Opportunity and Company in Copper
+    const checkSizeOptions = customFieldsDict ? customFieldsDict[648463]?.options : [];
+
     // Use the custom field ids of Stage and Geographical Focus to get the list of ids on the selected opportunity
     var opportunityStagesOfInvestment = selectedOpportunity?.custom_fields.find(cf => cf.custom_field_definition_id === 648461)?.value ?? [];
     var opportunityGeographicalFocus = selectedOpportunity?.custom_fields.find(cf => cf.custom_field_definition_id === 648462)?.value ?? [];
@@ -89,6 +92,7 @@ function Body(){
                 industryOptions={industryOptions || []}
                 setEmailList={setEmailRecipients}
                 emailList={emailRecipients}
+                checkSizeOptions={checkSizeOptions || []}
             />
             <EmailList setEmailList={setEmailRecipients} emailRecipients={emailRecipients}/>
         </div>

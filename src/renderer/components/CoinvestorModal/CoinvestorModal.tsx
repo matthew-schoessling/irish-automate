@@ -1,6 +1,6 @@
 import './CoinvestorModal.css';
 import { Coinvestor, Option, Person, User } from '../../../helpers/types';
-import { stagesOfInvestmentDisplay, geographicalFocusDisplay, getIndustries } from '../../../helpers/methods';
+import { stagesOfInvestmentDisplay, geographicalFocusDisplay, getIndustries, checkSizesDisplay } from '../../../helpers/methods';
 
 interface CoinvestorModalProps {
     coinvestor: Coinvestor;
@@ -8,9 +8,11 @@ interface CoinvestorModalProps {
     stageOfInvestmentOptions: Option[];
     geographicalFocusOptions: Option[];
     industryOptions: Option[];
+    checkSizeOptions: Option[];
     setEmailList: React.Dispatch<React.SetStateAction<Person[]>>;
     emailList: Person[];
     owner: User | undefined;
+    stars: string;
 }
 
 function CoinvestorModal({
@@ -19,9 +21,11 @@ function CoinvestorModal({
     stageOfInvestmentOptions,
     geographicalFocusOptions,
     industryOptions,
+    checkSizeOptions,
     setEmailList,
     emailList,
-    owner
+    owner,
+    stars
 }: CoinvestorModalProps) {
     const closeCoinvestorModal = () => {
         setIsModalOpen(false);
@@ -48,13 +52,19 @@ function CoinvestorModal({
     const stagesOfInvestment = stagesOfInvestmentDisplay(coinvestor.custom_fields, stageOfInvestmentOptions);
     const geographicalFocus = geographicalFocusDisplay(coinvestor.custom_fields, geographicalFocusOptions);
     const industries = getIndustries(coinvestor.custom_fields, industryOptions);
+    const checkSizes = checkSizesDisplay(coinvestor.custom_fields, checkSizeOptions);
 
     return (
         <div className="modal-overlay" onClick={closeCoinvestorModal}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>   
                 <div className="coinvestor-details-container">
-                    <div className="coinvestor-header">
-                        Coinvestor Information
+                    <div className="title-star-modal-container">
+                        <div className="coinvestor-modal-header">
+                            Coinvestor Information
+                        </div>
+                        <div className="star-header">
+                            {stars}
+                        </div>
                     </div>
                     <div className="coinvestor-grid">
                         <div className="coinvestor-label">Description:</div>
@@ -71,6 +81,9 @@ function CoinvestorModal({
 
                         <div className="coinvestor-label">Owner:</div>
                         <div className="coinvestor-value">{owner !== undefined ? owner.name : "None"}</div>
+
+                        <div className="coinvestor-label">Check Sizes:</div>
+                        <div className="coinvestor-value">{checkSizes}</div>
                     </div>
                 </div>
                 <div className="contacts-container">

@@ -9,6 +9,7 @@ interface CoinvestorCardProps {
     coinvestorRatingsOptions: Option[];
     stageOfInvestmentOptions: Option[];
     geographicalFocusOptions: Option[];
+    checkSizeOptions: Option[];
     industryOptions: Option[];
     setEmailList: React.Dispatch<React.SetStateAction<Person[]>>;
     emailList: Person[];
@@ -21,6 +22,7 @@ function CoinvestorCard({
     coinvestorRatingsOptions,
     stageOfInvestmentOptions, 
     geographicalFocusOptions,
+    checkSizeOptions,
     industryOptions,
     setEmailList,
     emailList,
@@ -47,9 +49,11 @@ function CoinvestorCard({
                     stageOfInvestmentOptions={stageOfInvestmentOptions}
                     geographicalFocusOptions={geographicalFocusOptions}
                     industryOptions={industryOptions}
+                    checkSizeOptions={checkSizeOptions}
                     setEmailList={setEmailList}
                     emailList={emailList}
                     owner={owner}
+                    stars={stars}
                 />
             }
             <div className="card-header-container">

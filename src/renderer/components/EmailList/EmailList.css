@@ -9,27 +9,6 @@
     margin: 1vh auto;
     align-items: center;
 }
-.copy-emails-button {
-    min-width: 10vw;
-    min-height: 38px;
-    background-color: #ae9142;
-    color: white;
-    border: transparent;
-    border-radius: 6px;
-    font-family: inherit;
-    font-size: 18px;
-    margin-left: 2vw;
-}
-
-.copy-emails-button:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    cursor: pointer;
-}
-
-.copy-emails-button:active {
-    background-color: #a3883d;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
 
 .email-list-container {
     display: flex;

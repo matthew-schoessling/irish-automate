@@ -51,7 +51,7 @@ function CoinvestorModal({
 
     const stagesOfInvestment = stagesOfInvestmentDisplay(coinvestor.custom_fields, stageOfInvestmentOptions);
     const geographicalFocus = geographicalFocusDisplay(coinvestor.custom_fields, geographicalFocusOptions);
-    const industries = getIndustries(coinvestor.custom_fields, industryOptions);
+    const industries = getIndustries(coinvestor.custom_fields, industryOptions, ', ');
     const checkSizes = checkSizesDisplay(coinvestor.custom_fields, checkSizeOptions);
 
     return (

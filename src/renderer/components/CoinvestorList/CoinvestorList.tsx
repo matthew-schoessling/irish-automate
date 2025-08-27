@@ -73,7 +73,6 @@ function CoinvestorList({
                 ).filter(ci => ci.name !== null && ci.rankingId !== null)
                 // 1931712 = 4 stars, ..., 1931709 = 1 star. We sort so that 4 stars show up in list first
                 .sort((a,b) => b.rankingId - a.rankingId);
-                console.log(companies)
                 
                 // Request for Current Users in Copper (IrishAngels team that has access to Copper)
                 const usersRequest = await fetch(userUrl, {
@@ -228,14 +227,8 @@ function CoinvestorList({
                 var coinvestorIndustriesSet = new Set(listCoinvestorIndustries?.value)
 
                 if (coinvestorIndustriesSet.size !== 0) {
-                    if (c.name === "Pritzker Group") {
-                        console.log('yup in here');
-                    }
                     // If Coinvestor is agnostic, +1
                     if (coinvestorIndustriesSet.has(1931259)) {
-                        if (c.name === "Pritzker Group") {
-                            console.log(`yup in here and rank increasing from ${rank}`);
-                        }
                         rank++;
                         matchingCriteria.push("Agnostic");
                     }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Select from 'react-select';
 import { baseUrl, headers} from '../../../helpers/constants';
-import { SelectOption, Opportunity, Person, EntityCustomField, CustomField, Stage, Option } from '../../../helpers/types';
+import { SelectOption, Opportunity, Person, Website, Stage, Option, Company } from '../../../helpers/types';
 import { findContactEmail, getIndustries } from '../../../helpers/methods';
 
 interface OpportunitySelectorProps {
@@ -93,9 +93,19 @@ function OpportunitySelector({
         });
         const contactData = await contactResponse.json() as Person;
 
+        // Get Company Info
+        const apiCompanyUrl = `${baseUrl}/companies/${data.company_id}`;
+        const companyResponse = await fetch(apiCompanyUrl, {
+            method: 'GET',
+            headers: headers
+        });
+        const companyData = await companyResponse.json() as Company;
+
+        data.opportunity_website = companyData.websites.find((website: Website) => website.category === "work")?.url;
+
         setSelectedOpportunity(data);
         setStage(stages?.find(stage => stage.id == data.pipeline_stage_id));
-        const oppsIndustryIds = getIndustries(data.custom_fields, industryOptions);
+        const oppsIndustryIds = getIndustries(data.custom_fields, industryOptions, ', ');
         setIndustry(oppsIndustryIds);
 
         // Find contact's work email or first email in their list

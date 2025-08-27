@@ -53,6 +53,9 @@ function Body(){
     // 648462 is the id for the "Geographical Focus" field that exists on both Opportunity and Company in Copper
     const geographicalFocusOptions = customFieldsDict ? customFieldsDict[648462]?.options : [];
 
+    // 247906 is the id for the "Round Structure" field that exists on the Opportunity in Copper
+    const roundStructureOptions = customFieldsDict ? customFieldsDict[247906]?.options : [];
+
     // 648465 is the id for the "Industry" field that exists on both Opportunity and Company in Copper
     const industryOptions = customFieldsDict ? customFieldsDict[648465]?.options : [];
 
@@ -94,7 +97,15 @@ function Body(){
                 emailList={emailRecipients}
                 checkSizeOptions={checkSizeOptions || []}
             />
-            <EmailList setEmailList={setEmailRecipients} emailRecipients={emailRecipients}/>
+            <EmailList 
+                setEmailList={setEmailRecipients} 
+                emailRecipients={emailRecipients} 
+                selectedOpportunity={selectedOpportunity} 
+                stageOfInvestmentOptions={stagesOfInvestmentOptions || []}
+                roundStructureOptions={roundStructureOptions || []}
+                industryOptions={industryOptions || []}
+                mainContact={contact}
+            />
         </div>
     );
 };

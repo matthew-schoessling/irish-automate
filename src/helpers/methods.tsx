@@ -18,6 +18,18 @@ export const stagesOfInvestmentDisplay = (entityCustomFields: EntityCustomField[
     return stageNamesList.map(option => option.name).join(', ');
 }
 
+export const firstStageOfInvestmentDisplay = (entityCustomFields: EntityCustomField[], stageOfInvestmentOptions: Option[]) => {
+    // For purposes of a general email, if more than one stage exists, we're prioritizing and only including the lowest of multiple stages selected on a single opportunity
+    var stagesOfInvestment = entityCustomFields.find(cf => cf.custom_field_definition_id === 648461)?.value ?? [];
+    var lowestSeed = stageOfInvestmentOptions.sort((a,b) => a.rank - b.rank).filter(stageOption => stagesOfInvestment.includes(stageOption.id)).shift();
+    return lowestSeed?.name;
+}
+
+export const roundStructureDisplay = (entityCustomFields: EntityCustomField[], roundStructureOptions: Option[]) => {
+    const roundStructureId = entityCustomFields.find(cf => cf.custom_field_definition_id===247906)?.value;
+    return roundStructureOptions.find(roundStructure => roundStructure.id === roundStructureId)?.name;
+}
+
 export const geographicalFocusDisplay = (entityCustomFields: EntityCustomField[], geographicalFocusOptions: Option[]) => {
     // Use same formula to get list of Geographical Focuses for the selected entity
     var geographicalFocus = entityCustomFields.find(cf => cf.custom_field_definition_id === 648462)?.value ?? [];
@@ -32,7 +44,11 @@ export const checkSizesDisplay = (entityCustomFields: EntityCustomField[], check
     return checkSizesList.sort((a,b) => a.rank - b.rank).map(option => option.name).join(', ');
 }
 
-export const getIndustries = (customFields: EntityCustomField[], industryOptions: Option[]) => {
+export const getIndustries = (customFields: EntityCustomField[], industryOptions: Option[], separator: string) => {
     const industriesCustomField = customFields.find((cf: EntityCustomField) => cf.custom_field_definition_id === 648465)?.value;
-    return industriesCustomField.map((id: number) => industryOptions.find(ind => ind.id == id)?.name).join(', ');
+    return industriesCustomField.map((id: number) => industryOptions.find(ind => ind.id === id)?.name).join(separator);
+}
+
+export const displayAsCurrency = (dollarAmount: number | undefined) => {
+    return dollarAmount?.toLocaleString('en-US', {style: 'currency', currency: 'USD', maximumFractionDigits: 0});
 }

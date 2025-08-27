@@ -1,12 +1,33 @@
-import { Person } from '../../../helpers/types';
+import { useState} from 'react';
+import { Person, Opportunity, Option } from '../../../helpers/types';
 import './EmailList.css';
+import TemplatedEmail from '../TemplatedEmail/TemplatedEmail';
 
 interface EmailListProps {
     setEmailList: React.Dispatch<React.SetStateAction<Person[]>>;
     emailRecipients: Person[];
+    selectedOpportunity: Opportunity | undefined;
+    stageOfInvestmentOptions: Option[];
+    roundStructureOptions: Option[];
+    industryOptions: Option[];
+    mainContact: Person | undefined;
 }
 
-function EmailList({setEmailList, emailRecipients} : EmailListProps) {
+function EmailList({
+    setEmailList, 
+    emailRecipients, 
+    selectedOpportunity, 
+    stageOfInvestmentOptions,
+    roundStructureOptions,
+    industryOptions,
+    mainContact
+} : EmailListProps) {
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
+    const showTemplatedEmailModal = () => {
+        setIsModalOpen(true);
+    }
+
     const removeRecipient = (e: React.MouseEvent<HTMLDivElement>) => {
         const target = e.target as HTMLDivElement;
         setEmailList(prevEmailList => {
@@ -26,12 +47,22 @@ function EmailList({setEmailList, emailRecipients} : EmailListProps) {
                     ))}
                 </div>
             <button className="copy-emails-button" 
-                onClick={() => {
-                    navigator.clipboard.writeText(emailRecipients.map(contact => contact.email).join('; '))
-                }}
+                onClick={showTemplatedEmailModal}
             >
-                Copy Emails
+                Generate Email
             </button>
+            {isModalOpen &&
+                <TemplatedEmail 
+                    setIsModalOpen={setIsModalOpen}
+                    setEmailList={setEmailList}
+                    emailRecipients={emailRecipients}
+                    selectedOpportunity={selectedOpportunity}
+                    stageOfInvestmentOptions={stageOfInvestmentOptions}
+                    roundStructureOptions={roundStructureOptions}
+                    industryOptions={industryOptions}
+                    mainContact={mainContact}
+                />
+            }
         </div>
     )
 }

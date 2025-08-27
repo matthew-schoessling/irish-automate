@@ -27,11 +27,13 @@ export interface CustomField {
 export interface Opportunity {
     id: number;
     name: string;
+    company_id: number;
     company_name: string;
     details: string;
     pipeline_stage_id: number;
     primary_contact_id: number;
     custom_fields: EntityCustomField[];
+    opportunity_website?: string;
 }
 
 export interface Stage {
@@ -47,6 +49,7 @@ export interface Person {
     interaction_count: number,
     date_last_contacted: number,
     emails: Email[];
+    socials: Website[];
 }
 
 export interface Email {
@@ -71,4 +74,14 @@ export interface User {
     id: number,
     name: string,
     email: string
+}
+
+export interface Company {
+    id: number;
+    websites: Website[];
+}
+
+export interface Website {
+    url: string;
+    category: string;
 }

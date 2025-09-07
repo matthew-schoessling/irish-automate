@@ -1,0 +1,36 @@
+.opp-card-container {
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(12, 35, 64, .25);
+    padding: 2vh 2vw 0 2vw;
+    width: 86vw;
+    margin: 2vh auto 1vh auto;
+    height: 28vh;
+    overflow: auto;
+  }
+  
+  .opportunity-header {
+    font-size: 25px;
+    font-weight: 600;
+    color: #0C2340;
+    border-bottom: 1px solid rgba(12, 35, 64, 0.2);
+    padding-bottom: 10px;
+  }
+  
+  .opportunity-grid {
+    display: grid;
+    grid-template-columns: 15% 85%;
+    gap: 12px 24px;
+    padding: 1vh 0;
+  }
+  
+  .opportunity-label {
+    font-weight: 500;
+    color: #555;
+    text-align: right;
+  }
+  
+  .opportunity-value {
+    font-weight: 400;
+    color: #222;
+    text-align: left;
+  }

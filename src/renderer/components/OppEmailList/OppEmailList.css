@@ -1,0 +1,49 @@
+.opp-list-button-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(12, 35, 64, .75);    
+    padding: 2vh 2vw;
+    width: 86vw;
+    margin: 1vh auto;
+    align-items: center;
+}
+
+.opp-email-list-container {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+}
+
+.opp-email-list-container::-webkit-scrollbar {
+    display: none;
+}
+
+.opp-email-title {
+    font-weight: bold;
+    font-size: 18px;
+    white-space: nowrap;
+}
+
+.opp-email-recipient {
+    display: flex;
+    flex-direction: row;
+    border: 1px solid rgba(12, 35, 64);
+    padding: 5px;
+    margin-left: 10px;
+    border-radius: 12px;
+}
+
+.opp-recipient-name {
+    white-space: nowrap;
+}
+
+.opp-remove-recipient {
+    padding-left: 10px;
+    font-family: sans-serif;
+}
+
+.opp-remove-recipient:hover {
+    cursor: pointer;
+}

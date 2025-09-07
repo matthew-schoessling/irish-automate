@@ -1,0 +1,5 @@
+.body-class {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}

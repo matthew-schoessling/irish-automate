@@ -14,6 +14,13 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
+import * as dotenv from "dotenv";
+import ExcelJS from 'exceljs';
+import configData from '../../assets/config.json';
+import { Opportunity, CustomField, Option, Person } from '../helpers/types';
+import { stringify } from 'querystring';
+
+dotenv.config();
 
 class AppUpdater {
   constructor() {
@@ -29,6 +36,126 @@ ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
   console.log(msgTemplate(arg));
   event.reply('ipc-example', msgTemplate('pong'));
+});
+
+ipcMain.handle('read-one-pager', async (
+  event, 
+  selectedOpportunity: Opportunity,
+  customFieldsDict: Record<number, CustomField> | undefined,
+  contact: Person | undefined
+) => {
+  // Ensure config data was properly loaded as it's essential to execution
+  if (customFieldsDict == undefined)
+    throw new Error('Custom Field Dictionary was not created correctly. Make sure config is properly set');
+
+  let onePagerPath = '';
+  if (process.env.NODE_ENV === 'development') {
+    // Use the original dev path
+    onePagerPath = path.join(app.getAppPath(), 'assets', 'One-Pager_template.xlsx');
+  } else {
+    // Use the packaged path
+    onePagerPath = path.join(process.resourcesPath, 'assets', 'One-Pager_template.xlsx');
+  }
+  const os = require('os');
+  const today = new Date();
+  const mmddyy = `${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}${String(today.getFullYear()).slice(-2)}`;
+  const onePagerWritePath = path.join(os.homedir(), `${selectedOpportunity.name}-${mmddyy}.xlsx`);
+
+  const wb = new ExcelJS.Workbook();
+  await wb.xlsx.readFile(onePagerPath);
+
+  // Assign Copper's standard Opportunity values to relevant excel fields
+  for (const [key, val] of Object.entries(configData.opportunity))
+  {
+    var cell = wb.getWorksheet(val.sheet)?.getCell(val.cell);
+    var newCellValue = selectedOpportunity[key as keyof Opportunity];
+    
+    if (cell && (typeof newCellValue === 'number' || typeof newCellValue === 'string'))
+      cell.value = newCellValue;
+  }
+
+  // City and State are combined in excel output, so they're handled a bit differently
+  let opp_city = '';
+  let opp_state = '';
+
+  // Export Copper custom fields to excel output 
+  for (const customField of selectedOpportunity.custom_fields) {
+    const customFieldConfigData = customFieldsDict[customField.custom_field_definition_id];
+console.log('')
+    if (!customFieldConfigData || !(customFieldConfigData.name in configData.custom_opp_fields))
+      continue;
+    const excelInfo = configData.custom_opp_fields[customFieldConfigData.name as keyof object]
+    const optionsDict = customFieldConfigData.options?.reduce((acc, opt) => {
+      acc[opt.id] = opt;
+      return acc;
+    }, {} as Record<number, Option>)
+
+    if (customFieldConfigData.id == 327449) {
+      opp_city = customField.value;
+    }
+    else if (customFieldConfigData.id == 327711) {
+      opp_state = customField.value;
+    }
+    else if (['Text', 'String', 'Currency'].includes(customFieldConfigData.data_type)) {
+      var cell = wb.getWorksheet(excelInfo['sheet'])?.getCell(excelInfo['cell']);
+      var newTextValue: number | string = customField.value;
+      
+      if (cell)
+        cell.value = newTextValue;
+    }
+    else if (customFieldConfigData.data_type == 'MultiSelect') {
+      if (optionsDict == undefined)
+        continue;
+      const selections: string = customField.value.map((opt: number) => optionsDict[opt])
+                                            .sort((a: Option,b: Option) => a.rank - b.rank)
+                                            .map((opt: Option) => opt.name)
+                                            .join(', ');
+
+      var cell = wb.getWorksheet(excelInfo['sheet'])?.getCell(excelInfo['cell']);
+      
+      if (cell)
+        cell.value = selections;    
+    }
+    else if (customFieldConfigData.data_type == 'Dropdown') {
+      if (optionsDict == undefined)
+        continue;
+      
+      var cell = wb.getWorksheet(excelInfo['sheet'])?.getCell(excelInfo['cell']);
+      var newDropdownValue: string = optionsDict[customField.value]?.name ?? "";
+      
+      if (cell)
+        cell.value = newDropdownValue;
+    }
+  }
+
+  // Set Location Value
+  const locationExcelInfo = configData.custom_opp_fields['Location'];
+  var cell = wb.getWorksheet(locationExcelInfo['sheet'])?.getCell(locationExcelInfo['cell']);
+  if (cell)
+    cell.value = `${opp_city}, ${opp_state}`;
+
+  // Get Primary Contact Info
+  if (contact)
+  {
+    for (const [key, val] of Object.entries(configData.primary_contact)) {
+      var contactCell = wb.getWorksheet(val.sheet)?.getCell(val.cell);
+      var contactCellValue = contact[key as keyof Person];
+    
+      if (contactCell && (typeof contactCellValue === 'number' || typeof contactCellValue === 'string'))
+      contactCell.value = contactCellValue;
+    }
+  }
+
+  wb.xlsx.writeFile(onePagerWritePath);
+
+  return onePagerWritePath;
+  
+});
+ipcMain.handle('write-one-pager', async (event, writtenFile: ExcelJS.Workbook) => {
+  const os = require('os');
+  const onePagerPath = path.join(os.homedir(), 'New-One-Pager_template.xlsx');
+  
+  return await writtenFile.xlsx.writeFile(onePagerPath);
 });
 
 if (process.env.NODE_ENV === 'production') {
@@ -73,7 +200,7 @@ const createWindow = async () => {
     show: false,
     width: 1024,
     height: 728,
-    icon: getAssetPath('icon.png'),
+    icon: getAssetPath('irishangelsnetwork_logo.png'),
     webPreferences: {
       preload: app.isPackaged
         ? path.join(__dirname, 'preload.js')
@@ -82,6 +209,7 @@ const createWindow = async () => {
   });
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
+  mainWindow.maximize();
 
   mainWindow.on('ready-to-show', () => {
     if (!mainWindow) {

@@ -35,6 +35,8 @@ function EmailList({
         })
     }
 
+    if (!selectedOpportunity) return;
+
     return (
         <div className="list-button-container">
                 <div className="email-title">Email Recipients:</div>

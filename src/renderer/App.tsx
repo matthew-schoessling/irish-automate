@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar/Navbar';
 import Body from './components/Body/Body';
@@ -5,10 +6,12 @@ import './App.css';
 
 function Hello() {
 
+  const [isOpportunityView, setIsOpportunityView] = useState<boolean>(true);
+
   return (
     <div>
-      <Navbar />
-      <Body />
+      <Navbar isOpportunityView={isOpportunityView} setIsOpportunityView={setIsOpportunityView} />
+      <Body isOpportunityView={isOpportunityView} />
     </div>
   );
 }

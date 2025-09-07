@@ -1,4 +1,4 @@
-.opp-card-container {
+.coinvestor-info-container {
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(12, 35, 64, .25);
     padding: 2vh 2vw 0 2vw;
@@ -8,7 +8,7 @@
     overflow: auto;
   }
   
-  .opportunity-header {
+  .coinvestor-info-header {
     font-size: 25px;
     font-weight: 600;
     color: #0C2340;
@@ -16,20 +16,20 @@
     padding-bottom: 10px;
   }
   
-  .opportunity-grid {
+  .coinvestor-grid {
     display: grid;
     grid-template-columns: 15% 85%;
     gap: 12px 24px;
     padding: 1vh 0;
   }
   
-  .opportunity-label {
+  .coinvestor-label {
     font-weight: 500;
     color: #555;
     text-align: right;
   }
   
-  .opportunity-value {
+  .coinvestor-value {
     font-weight: 400;
     color: #222;
     text-align: left;

@@ -5,26 +5,18 @@ import { stagesOfInvestmentDisplay, geographicalFocusDisplay, getIndustries, che
 interface CoinvestorModalProps {
     coinvestor: Coinvestor;
     setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    stageOfInvestmentOptions: Option[];
-    geographicalFocusOptions: Option[];
     industryOptions: Option[];
-    checkSizeOptions: Option[];
     setEmailList: React.Dispatch<React.SetStateAction<Person[]>>;
     emailList: Person[];
-    owner: User | undefined;
     stars: string;
 }
 
 function CoinvestorModal({
     coinvestor, 
     setIsModalOpen,
-    stageOfInvestmentOptions,
-    geographicalFocusOptions,
     industryOptions,
-    checkSizeOptions,
     setEmailList,
     emailList,
-    owner,
     stars
 }: CoinvestorModalProps) {
     const closeCoinvestorModal = () => {
@@ -49,10 +41,7 @@ function CoinvestorModal({
         })
     }
 
-    const stagesOfInvestment = stagesOfInvestmentDisplay(coinvestor.custom_fields, stageOfInvestmentOptions);
-    const geographicalFocus = geographicalFocusDisplay(coinvestor.custom_fields, geographicalFocusOptions);
     const industries = getIndustries(coinvestor.custom_fields, industryOptions, ', ');
-    const checkSizes = checkSizesDisplay(coinvestor.custom_fields, checkSizeOptions);
 
     return (
         <div className="modal-overlay" onClick={closeCoinvestorModal}>
@@ -71,19 +60,19 @@ function CoinvestorModal({
                         <div className="coinvestor-value">{coinvestor?.details}</div>
 
                         <div className="coinvestor-label">Stage of Investment:</div>
-                        <div className="coinvestor-value">{stagesOfInvestment}</div>
+                        <div className="coinvestor-value">{coinvestor?.stagesOfInvestment}</div>
 
                         <div className="coinvestor-label">Geographical Focus:</div>
-                        <div className="coinvestor-value">{geographicalFocus}</div>
+                        <div className="coinvestor-value">{coinvestor?.geographicalFocus}</div>
 
                         <div className="coinvestor-label">Industries:</div>
                         <div className="coinvestor-value">{industries}</div>
 
                         <div className="coinvestor-label">Owner:</div>
-                        <div className="coinvestor-value">{owner !== undefined ? owner.name : "None"}</div>
+                        <div className="coinvestor-value">{coinvestor?.owner !== undefined ? coinvestor?.owner.name : "None"}</div>
 
                         <div className="coinvestor-label">Check Sizes:</div>
-                        <div className="coinvestor-value">{checkSizes}</div>
+                        <div className="coinvestor-value">{coinvestor?.checkSizes}</div>
                     </div>
                 </div>
                 <div className="contacts-container">

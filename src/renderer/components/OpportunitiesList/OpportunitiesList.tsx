@@ -1,63 +1,43 @@
 import { useState, useEffect } from 'react'; 
-import './CoinvestorList.css';
-import { Coinvestor, Option, Opportunity, User, CustomField, Person } from '../../../helpers/types';
-import { fetchCoinvestors, fetchIrishAngelsUserData } from '../../../helpers/methods';
-import CoinvestorCard from '../CoinvestorCard/CoinvestorCard';
+import './OpportunitiesList.css';
+import { Coinvestor, Opportunity, Option } from '../../../helpers/types';
+import OpportunityCard from '../OpportunityCard/OpportunityCard';
 
-interface CoinvestorListProps {
-    coinvestorRatingsOptions: Option[];
-    selectedOpportunity: Opportunity | undefined;
-    opportunityStagesOfInvestment: number[];
-    opportunityGeographicalFocus: number[];
+interface OpportunityListProps {
+    selectedCoinvestor: Coinvestor | undefined;
+    opportunities: Opportunity[];
+    setOpportunities: React.Dispatch<React.SetStateAction<Opportunity[]>>;
+    oppEmailList: Opportunity[];
+    setOppEmailList: React.Dispatch<React.SetStateAction<Opportunity[]>>;
     industryOptions: Option[];
-    setEmailList: React.Dispatch<React.SetStateAction<Person[]>>;
-    emailList: Person[];
-    coinvestors: Coinvestor[];
-    setCoinvestors: React.Dispatch<React.SetStateAction<Coinvestor[]>>;
-    users: User[]
 }
 
-function CoinvestorList({
-    coinvestorRatingsOptions, 
-    selectedOpportunity,
-    opportunityStagesOfInvestment, 
-    opportunityGeographicalFocus, 
-    industryOptions,
-    setEmailList,
-    emailList,
-    coinvestors,
-    setCoinvestors,
-    users
-}: CoinvestorListProps) {
+function OpportunitiesList({
+    selectedCoinvestor,
+    opportunities,
+    setOpportunities,
+    oppEmailList,
+    setOppEmailList,
+    industryOptions
+}: OpportunityListProps) {
     let pauseRender = false;
 
     useEffect(() => {
         pauseRender = true;
         // If selected opportunity is undefined, return as we can't re-rank the coinvestors
-        if (selectedOpportunity == undefined)
+        if (selectedCoinvestor == undefined)
             return;
-        
-        const oppRoundSize = selectedOpportunity.custom_fields.find(cf => cf.custom_field_definition_id===666330)
-        const oppIndustryExpertise = selectedOpportunity.custom_fields.find(cf => cf.custom_field_definition_id===648465)
-        
-        // Reset all ranks to 0, and rank all coinvestors based on how well it matches Selected Opportunity
-        setCoinvestors(prevCoinvestors =>
-            prevCoinvestors.map(c => {
-                let rank = 0
+
+        setOpportunities(prevOpportunities => 
+            prevOpportunities.map(opp => {
+                let rank = 0;
                 let checkSizeMatch = false;
                 let matchingCriteria = [];
                 let nonmatchingCriteria = [];
 
-                // If Owner field is a current Copper User, +1 for that coinvestor
-                if (users.find(u => u.id === c.assignee_id) !== undefined) {
-                    rank++;
-                    matchingCriteria.push("Owner");
-                } else {
-                    nonmatchingCriteria.push("Owner");
-                }
-                
-                // If Round Size of the Opportunity falls within a range of the coinvestor, +1
-                const coinvestorCheckSizes = c.custom_fields.find(cf => cf.custom_field_definition_id === 648463)
+                // Round Size
+                const oppRoundSize = opp.custom_fields.find(cf => cf.custom_field_definition_id===666330);
+                const coinvestorCheckSizes = selectedCoinvestor.custom_fields.find(cf => cf.custom_field_definition_id === 648463);
 
                 if (coinvestorCheckSizes?.value && oppRoundSize?.value) {
                     const csList = coinvestorCheckSizes.value as number[];
@@ -85,7 +65,8 @@ function CoinvestorList({
                 }
 
                 // If Stage of the Opportunity matches stages of coinvestor, +1
-                const coinvestorStages = c.custom_fields.find(cf => cf.custom_field_definition_id === 648461)?.value as number[];
+                const coinvestorStages = selectedCoinvestor.custom_fields.find(cf => cf.custom_field_definition_id === 648461)?.value as number[];
+                var opportunityStagesOfInvestment = opp.custom_fields.find(cf => cf.custom_field_definition_id === 648461)?.value ?? [];
 
                 if (coinvestorStages) {
                     // This variable will track if the coinvestor specifically doesn't invest in the region of the Opportunity
@@ -104,7 +85,8 @@ function CoinvestorList({
                 }
 
                 // If Region of the Opportunity matches region focus of coinvestor, +1
-                const coinvestorGeographicalFocuses = c.custom_fields.find(cf => cf.custom_field_definition_id === 648462)?.value as number[];
+                const coinvestorGeographicalFocuses = selectedCoinvestor.custom_fields.find(cf => cf.custom_field_definition_id === 648462)?.value as number[];
+                const opportunityGeographicalFocus = opp.custom_fields.find(cf => cf.custom_field_definition_id === 648462)?.value as number[]
 
                 if (coinvestorGeographicalFocuses) {
                     var antiRegionMatch = false;
@@ -128,7 +110,8 @@ function CoinvestorList({
                 }
 
                 // Foreach industry matched between opportunity and coinvestor, +1
-                var listCoinvestorIndustries = c.custom_fields.find(cf => cf.custom_field_definition_id===648465)
+                var listCoinvestorIndustries = selectedCoinvestor.custom_fields.find(cf => cf.custom_field_definition_id===648465)
+                var listOppIndustries = opp.custom_fields.find(cf => cf.custom_field_definition_id===648465)
                 var coinvestorIndustriesSet = new Set(listCoinvestorIndustries?.value)
 
                 if (coinvestorIndustriesSet.size !== 0) {
@@ -139,7 +122,7 @@ function CoinvestorList({
                     }
 
                     // For every sector of the opportunity, if the Coinvestor is specifically experted in that sector, +1
-                    oppIndustryExpertise?.value.map((oppIndustry: number) => {
+                    listOppIndustries?.value.map((oppIndustry: number) => {
                         const industryName = industryOptions?.find(i => i.id===oppIndustry)?.name;
                         if (oppIndustry != 1931259) {
                             if (coinvestorIndustriesSet.has(oppIndustry)) {
@@ -151,42 +134,36 @@ function CoinvestorList({
                         }
                     })
                 }
+                opp.coinvestorMatchRank = rank;
+                opp.matchingCriteria = matchingCriteria;
+                opp.nonmatchingCriteria = nonmatchingCriteria;
 
-                // Return Coinvestor value with its new rank
-                return {
-                    ...c,
-                    opportunityMatchRank: rank,
-                    matchingCriteria: matchingCriteria,
-                    nonmatchingCriteria: nonmatchingCriteria
-                }
+                return opp;
             })
-        );
+        )
+        
         pauseRender = false;
-    }, [selectedOpportunity]);
+    }, [selectedCoinvestor]);
 
-    if (!selectedOpportunity || pauseRender) return null;
+    if (!selectedCoinvestor || pauseRender) return null;
 
     return (
-        <div className="coinvestor-container">
-            <div className="coinvestor-header">
-                Potential Coinvestors
+        <div className="opportunity-container">
+            <div className="opportunity-header">
+                Potential Opportunities
             </div>
-            <div className="coinvestor-list-container">
-                {coinvestors
-                    .slice()
+            <div className="opportunity-list-container">
+                {opportunities
+                    .filter(opp => opp.status === "Open" && opp.pipeline_id === 470884) // 470884 relates to the Deal Flow/Portfolio Opportunities for IrishAngels
                     .sort((a,b) => {
-                        //if (b.opportunityMatchRank !== a.opportunityMatchRank) // waiting for star ordering
-                          return b.opportunityMatchRank - a.opportunityMatchRank
+                          return b.coinvestorMatchRank - a.coinvestorMatchRank
                     })
-                    .map((coinvestor, index) => (
-                        <CoinvestorCard 
-                            key={`coinvestor-${index}`} 
-                            coinvestor={coinvestor} 
-                            rankCustomField={coinvestor.custom_fields?.find(cf => cf.custom_field_definition_id===648777)} 
-                            coinvestorRatingsOptions={coinvestorRatingsOptions}
-                            industryOptions={industryOptions}
-                            setEmailList={setEmailList}
-                            emailList={emailList}
+                    .map((opportunity, index) => (
+                        <OpportunityCard 
+                            key={`opportuniy-${index}`} 
+                            opportunity={opportunity}
+                            oppEmailList={oppEmailList}
+                            setOppEmailList={setOppEmailList}
                         />
                     ))
                 }
@@ -195,4 +172,4 @@ function CoinvestorList({
     )
 }
 
-export default CoinvestorList;
+export default OpportunitiesList;

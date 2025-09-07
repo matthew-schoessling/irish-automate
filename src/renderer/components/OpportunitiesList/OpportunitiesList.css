@@ -1,4 +1,4 @@
-.coinvestor-container {
+.opportunity-container {
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(12, 35, 64, .75);    
     padding: 2vh 2vw 0 2vw;
@@ -7,7 +7,7 @@
     height: 34vh;
 }
 
-.coinvestor-header {
+.opportunity-header {
     font-size: 25px;
     font-weight: 600;
     color: #0C2340;
@@ -15,9 +15,9 @@
     padding-bottom: 10px;
 } 
 
-.coinvestor-list-container {
+.opportunity-list-container {
     padding: 2px;
-    height: 28vh;
+    height: 30vh;
     width: 86vw;
     display: flex;
     flex-direction: row;

@@ -34,6 +34,11 @@ export interface Opportunity {
     primary_contact_id: number;
     custom_fields: EntityCustomField[];
     opportunity_website?: string;
+    pipeline_id: number;
+    matchingCriteria: string[];
+    nonmatchingCriteria: string[];
+    coinvestorMatchRank: number;
+    status: string;
 }
 
 export interface Stage {
@@ -68,6 +73,11 @@ export interface Coinvestor {
     details: string;
     contacts: Person[];
     rankingId: number | null;
+    stagesOfInvestment: string;
+    geographicalFocus: string;
+    industries: string;
+    checkSizes: string;
+    owner: User | undefined;
 }
 
 export interface User {

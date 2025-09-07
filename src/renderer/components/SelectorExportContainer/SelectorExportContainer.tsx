@@ -12,6 +12,8 @@ interface SelectorExportContainerProps {
     customFieldsDict: Record<number, CustomField>;
     contact: Person | undefined;
     industryOptions: Option[];
+    opportunities: Opportunity[];
+    stages: Stage[];
 }
 
 function SelectorExportContainer({
@@ -22,7 +24,9 @@ function SelectorExportContainer({
     selectedOpportunity,
     customFieldsDict,
     contact,
-    industryOptions
+    industryOptions,
+    opportunities,
+    stages
 } : SelectorExportContainerProps) {
 
     return (
@@ -33,6 +37,8 @@ function SelectorExportContainer({
                 setIndustry={setIndustry}
                 setContact={setContact}
                 industryOptions={industryOptions}
+                opportunities={opportunities}
+                stages={stages}
             />
             <ExportButton
                 selectedOpportunity={selectedOpportunity}

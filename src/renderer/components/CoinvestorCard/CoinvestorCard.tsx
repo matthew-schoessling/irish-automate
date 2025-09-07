@@ -7,26 +7,18 @@ interface CoinvestorCardProps {
     coinvestor: Coinvestor;
     rankCustomField: EntityCustomField | undefined;
     coinvestorRatingsOptions: Option[];
-    stageOfInvestmentOptions: Option[];
-    geographicalFocusOptions: Option[];
-    checkSizeOptions: Option[];
     industryOptions: Option[];
     setEmailList: React.Dispatch<React.SetStateAction<Person[]>>;
     emailList: Person[];
-    owner: User | undefined;
 }
 
 function CoinvestorCard({
     coinvestor, 
     rankCustomField, 
     coinvestorRatingsOptions,
-    stageOfInvestmentOptions, 
-    geographicalFocusOptions,
-    checkSizeOptions,
     industryOptions,
     setEmailList,
-    emailList,
-    owner
+    emailList
 }: CoinvestorCardProps) {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -46,13 +38,9 @@ function CoinvestorCard({
                 <CoinvestorModal 
                     coinvestor={coinvestor} 
                     setIsModalOpen={setIsModalOpen} 
-                    stageOfInvestmentOptions={stageOfInvestmentOptions}
-                    geographicalFocusOptions={geographicalFocusOptions}
                     industryOptions={industryOptions}
-                    checkSizeOptions={checkSizeOptions}
                     setEmailList={setEmailList}
                     emailList={emailList}
-                    owner={owner}
                     stars={stars}
                 />
             }

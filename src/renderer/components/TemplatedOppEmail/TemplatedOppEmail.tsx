@@ -14,7 +14,7 @@ interface TemplatedOppEmailProps {
     industryOptions: Option[];
 }
 
-function TemplatedEmail({
+function TemplatedOppEmail({
     setIsModalOpen,
     setEmailRecipients,
     emailRecipients,
@@ -25,8 +25,7 @@ function TemplatedEmail({
     industryOptions
 }: TemplatedOppEmailProps) {
     const [showToast, setShowToast] = useState<boolean>(false);
-    //var valueProposition = selectedOpportunity?.custom_fields.find(cf => cf.custom_field_definition_id === 665684)?.value;
-    //var nearTermGrowth = selectedOpportunity?.custom_fields.find(cf => cf.custom_field_definition_id === 665692)?.value;
+    const [toastMessage, setToastMessage] = useState<string>('');
 
     const closeTemplatedEmail = () => {
         setIsModalOpen(false);
@@ -38,7 +37,12 @@ function TemplatedEmail({
         })
     }
     const handleCopied = (emailToCopy: string) => {
-        navigator.clipboard.writeText(emailToCopy)
+        navigator.clipboard.writeText(emailToCopy);
+        showToastAndTimeout('Email ');
+    }
+
+    const showToastAndTimeout = (prefix: string) => {
+        setToastMessage(`${prefix}Copied!`);
         setShowToast(true);
         setTimeout(() => setShowToast(false), 2000);
     }
@@ -91,7 +95,7 @@ function TemplatedEmail({
     }
 
     const createDetails = (opp: Opportunity) => {
-        //var linkedin = mainContact?.socials.find(website => website.category === "linkedin")?.url;
+        var linkedin = opp.mainContact?.socials?.find(website => website.category === "linkedin")?.url;
         const linkToDeck = opp?.custom_fields.find(cf => cf.custom_field_definition_id===534710)?.value
         const oppRoundSize = opp?.custom_fields.find(cf => cf.custom_field_definition_id===666330)?.value;
         const valuation = opp?.custom_fields.find(cf => cf.custom_field_definition_id===666331)?.value;
@@ -108,14 +112,14 @@ function TemplatedEmail({
         return (
             <>
                 {opp?.details}
-                {opp?.details?.slice(-1) === "." || !opp?.details ? '' : '.'}
+                {opp?.details?.trim().slice(-1) === "." || !opp?.details ? '' : '.'}
                 {' '}
                 {
                     oppRoundSize && valuation && roundStructure && valuationType
                     ? <>The company is raising a {roundStructure} round of {displayAsCurrency(oppRoundSize)} at a {valuationType} valuation of {displayAsCurrency(valuation)}.{' '}</>
                     : <></>
                 }
-                {/* Founded by {linkedin ? <a href={`${linkedin}`} target="_blank">{mainContact?.name}</a> : mainContact?.name}. */}
+                Founded by {linkedin ? <a href={`${linkedin}`} target="_blank">{opp.mainContact?.name}</a> : opp.mainContact?.name}.
                 {' '}
                 {
                     linkToDeck
@@ -148,13 +152,13 @@ function TemplatedEmail({
 
     return (
         <div className="modal-overlay" onClick={closeTemplatedEmail}>
-            {showToast ? <div className="toast">Copied!</div> : <></>  }
+            {showToast ? <div className="toast">{toastMessage}</div> : <></>  }
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>   
                 <div className="to-container">
                     <div>To:</div>
                     <div className="email-list-container">
                         {emailRecipients.map((recipient: Person) => (
-                            <div className={"email-recipient"}>
+                            <div key={`templated-opp-email-list-${recipient.id}`} className={"email-recipient"}>
                                 <div className="recipient-name">{recipient.name}</div>
                                 <div className="copy-icon" onClick={() => handleCopied(recipient.email)}>
                                     <svg xmlns="http://www.w3.org/2000/svg" 
@@ -172,7 +176,8 @@ function TemplatedEmail({
                     </div>
                     <button className="copy-emails-button" 
                         onClick={() => {
-                            navigator.clipboard.writeText(emailRecipients.map(contact => contact.email).join('; '))
+                            navigator.clipboard.writeText(emailRecipients.map(contact => contact.email).join('; '));
+                            showToastAndTimeout('Emails ');
                         }}
                     >
                         Copy Emails
@@ -181,14 +186,13 @@ function TemplatedEmail({
                 <div className="body-container">
                     <div className="body-data">
                         {createIntro()}
-                        {/* {oppEmailList.map((opp: Opportunity) => {
-                            return `${createOppName(opp)} ${createOppMiniDetails(opp)} ${createDetails(opp)} ${createTraction(opp)} ${(</br>)}`;
-                        })} */}
-                        {/* {createOppName()}
-                        {createOppMiniDetails()}
-                        {createDetails()}
-                        {createTraction()}
-                        {createSignature()} */}
+                        {oppEmailList.map((opp: Opportunity) => (
+                            <div key={`opp-template-${opp.id}`}>
+                                {createOppName(opp)} {createOppMiniDetails(opp)} {createDetails(opp)} {createTraction(opp)}
+                                <br />
+                            </div>
+                        ))}
+                        {createSignature()}
                     </div>
                     <button className="copy-emails-button" 
                         onClick={async () => {
@@ -201,6 +205,7 @@ function TemplatedEmail({
                                     }),
                                 ]);
                             }
+                            showToastAndTimeout('Body ');
                         }}
                     >
                         Copy Body
@@ -211,4 +216,4 @@ function TemplatedEmail({
     );
 }
 
-export default TemplatedEmail;
+export default TemplatedOppEmail;

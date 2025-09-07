@@ -1,4 +1,4 @@
-import { Email, Option, EntityCustomField, CustomField, Opportunity, Stage, Person, Company, Coinvestor, User } from './types';
+import { Email, Option, EntityCustomField, CustomField, Opportunity, Stage, Person, Company, Coinvestor, User, Website } from './types';
 import { baseUrl, headers } from './constants';
 
 // Prefer to use a Contact's work email. If that doesn't exist, then use the first email listed for that contact
@@ -58,7 +58,7 @@ export const displayAsCurrency = (dollarAmount: number | undefined) => {
 
 /* Methods that fetch data from copper */
 export const fetchCustomFieldDefinitions = async (setCustomFieldsDict: React.Dispatch<React.SetStateAction<Record<number, CustomField>>>) => {
-    const customFieldsUrl = `${baseUrl}/custom_field_definitions`;
+    const customFieldsUrl = `${baseUrl}custom_field_definitions`;
 
     try {
         const customFieldsResponse = await fetch(customFieldsUrl, {
@@ -83,6 +83,8 @@ export const fetchCustomFieldDefinitions = async (setCustomFieldsDict: React.Dis
 
 export const fetchOpportunities = async (setOpportunities: React.Dispatch<React.SetStateAction<Opportunity[]>>) => {
     const listOpportunitiesUrl = baseUrl + 'opportunities/search';
+    const contactsUrl = baseUrl + 'people/search';
+    const companiesUrl = baseUrl + 'companies/search';
     // No efficient way to get total opportunities in Copper, so use a total pages that is much greater than actual amount total pages
     const totalPages = 50;
 
@@ -115,6 +117,61 @@ export const fetchOpportunities = async (setOpportunities: React.Dispatch<React.
                     status: opp.status
                 })) // returning Opportunity objects
         ).filter(opp => opp.company_name != null);
+
+        // Request for the main contact at each opportunity and the company info
+        const contactIds = opportunities.map(opp => opp.primary_contact_id);
+        const companyIds = opportunities.map(opp => opp.company_id);
+
+        const contactsRequest = Array.from({ length: totalPages }, (_, i) =>
+            fetch(contactsUrl, {
+                method: "POST",
+                headers: headers,
+                body: JSON.stringify({
+                    page_number: i + 1,
+                    page_size: 200,
+                    ids: contactIds
+                })
+            }).then(res => res.json())
+        );
+
+        const companiesRequest = Array.from({ length: totalPages }, (_, i) =>
+            fetch(companiesUrl, {
+                method: "POST",
+                headers: headers,
+                body: JSON.stringify({
+                    page_number: i + 1,
+                    page_size: 200,
+                    ids: companyIds
+                })
+            }).then(res => res.json())
+        );
+
+        const contactsData = await Promise.all(contactsRequest);
+        const contacts: Person[] = contactsData.flatMap((result) => 
+            result.map((contact: Person) => ({
+                id: contact.id,
+                company_id: contact.company_id,
+                name: contact.name,
+                email: findContactEmail(contact.emails),
+                interaction_count: contact.interaction_count,
+                date_last_contacted: contact.date_last_contacted,
+                emails: contact.emails,
+                socials: contact.socials
+            }))
+        );
+
+        const companiesData = await Promise.all(companiesRequest);
+        const companies: Company[] = companiesData.flatMap((result) => 
+            result.map((company: Company) => ({
+                id: company.id,
+                websites: company.websites
+            }))
+        );
+        
+        opportunities.forEach(opp => {
+            opp.mainContact = contacts.find(contact => contact.id === opp.primary_contact_id);
+            opp.opportunity_website = companies.find(company => company.id === opp.company_id)?.websites.find((website: Website) => website.category === "work")?.url;
+        })
         
         setOpportunities(opportunities);
     } catch (error) {
@@ -123,7 +180,7 @@ export const fetchOpportunities = async (setOpportunities: React.Dispatch<React.
 }
 
 export const fetchPipelineStages = async (setStages: React.Dispatch<React.SetStateAction<Stage[]>>) => {
-    const apiStageUrl = `${baseUrl}/pipeline_stages`;
+    const apiStageUrl = `${baseUrl}pipeline_stages`;
 
     try {
         const stageResponse = await fetch(apiStageUrl, {
@@ -143,7 +200,7 @@ export const fetchContactData = async (
     contactId: number,
     setContact: React.Dispatch<React.SetStateAction<Person | undefined>>
 ) => {
-    const apiContactUrl = `${baseUrl}/people/${contactId}`;
+    const apiContactUrl = `${baseUrl}people/${contactId}`;
 
     const contactResponse = await fetch(apiContactUrl, {
         method: 'GET',
@@ -158,7 +215,7 @@ export const fetchContactData = async (
 export const fetchCompanyData = async (
     companyId: number
 ) => {
-    const apiCompanyUrl = `${baseUrl}/companies/${companyId}`;
+    const apiCompanyUrl = `${baseUrl}companies/${companyId}`;
 
     const companyResponse = await fetch(apiCompanyUrl, {
         method: 'GET',
@@ -173,8 +230,8 @@ export const fetchCoinvestors = async (
     customFieldsDict: Record<number, CustomField> | undefined,
     users: User[]
 ) => {
-    const coinvestorUrl = baseUrl + '/companies/search';
-    const contactsUrl = baseUrl + '/people/search';
+    const coinvestorUrl = baseUrl + 'companies/search';
+    const contactsUrl = baseUrl + 'people/search';
     // No efficient way to get total coinvestors in Copper, so use a total pages that is much greater than actual amount total pages
     const totalPages = 10;
 
@@ -269,7 +326,7 @@ export const fetchCoinvestors = async (
 export const fetchIrishAngelsUserData = async (
     setUsers: React.Dispatch<React.SetStateAction<User[]>>
 ) => {
-    const userUrl = baseUrl + '/users/search';
+    const userUrl = baseUrl + 'users/search';
         
     // Request for Current Users in Copper (IrishAngels team that has access to Copper)
     const usersRequest = await fetch(userUrl, {

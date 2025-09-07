@@ -39,6 +39,7 @@ export interface Opportunity {
     nonmatchingCriteria: string[];
     coinvestorMatchRank: number;
     status: string;
+    mainContact: Person | undefined;
 }
 
 export interface Stage {

@@ -147,6 +147,8 @@ console.log('')
   }
 
   wb.xlsx.writeFile(onePagerWritePath);
+
+  return onePagerWritePath;
   
 });
 ipcMain.handle('write-one-pager', async (event, writtenFile: ExcelJS.Workbook) => {

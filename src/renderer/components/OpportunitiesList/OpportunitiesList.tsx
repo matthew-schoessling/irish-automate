@@ -62,6 +62,8 @@ function OpportunitiesList({
                         else
                             nonmatchingCriteria.push("Round Size");
                     }
+                } else {
+                    nonmatchingCriteria.push("Round Size");
                 }
 
                 // If Stage of the Opportunity matches stages of coinvestor, +1

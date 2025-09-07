@@ -44,7 +44,7 @@ function OppEmailList({
                 <div className="opp-email-title">Opportunities:</div>
                 <div className="opp-email-list-container">
                     {oppEmailList.map((opp: Opportunity) => (
-                        <div className={"opp-email-recipient"}>
+                        <div key={`opp-list-${opp.id}`} className={"opp-email-recipient"}>
                             <div className="opp-recipient-name">{opp.name}</div>
                             <div className="opp-remove-recipient" id={`${opp.id}`} onClick={e => removeOpp(e)}>x</div>
                         </div>
@@ -62,7 +62,7 @@ function OppEmailList({
                     oppEmailList={oppEmailList}
                     setEmailRecipients={setEmailRecipients}
                     emailRecipients={emailRecipients}
-                    stageOfInvestmentOptions={stagesOfInvestmentOptions || []}
+                    stageOfInvestmentOptions={stageOfInvestmentOptions || []}
                     roundStructureOptions={roundStructureOptions || []}
                     industryOptions={industryOptions || []}
                 />

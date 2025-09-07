@@ -42,7 +42,7 @@ function EmailList({
                 <div className="email-title">Email Recipients:</div>
                 <div className="email-list-container">
                     {emailRecipients.map((recipient: Person) => (
-                        <div className={"email-recipient"}>
+                        <div key={`email-list-${recipient.id}`} className={"email-recipient"}>
                             <div className="recipient-name">{recipient.name}</div>
                             <div className="remove-recipient" id={`${recipient.id}`} onClick={e => removeRecipient(e)}>x</div>
                         </div>

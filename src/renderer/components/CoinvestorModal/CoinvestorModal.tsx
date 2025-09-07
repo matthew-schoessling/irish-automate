@@ -81,7 +81,7 @@ function CoinvestorModal({
                     </div>
                     <table className="contacts-table">
                         <tbody>
-                        <tr className="contacts-header-row">
+                        <tr key="header-row" className="contacts-header-row">
                             <td><input type="checkbox"/></td>
                             <td>Name</td>
                             <td>Email</td>
@@ -90,7 +90,7 @@ function CoinvestorModal({
                         </tr>
                         { coinvestor.contacts.length > 0
                             ? coinvestor.contacts.sort((a, b) => b.date_last_contacted - a.date_last_contacted).map((contact: Person) => (
-                                <tr className="contact-row">
+                                <tr key={`contact-row-${contact.id}`} className="contact-row">
                                     <td>
                                         <input 
                                             className="contact-checkbox" 

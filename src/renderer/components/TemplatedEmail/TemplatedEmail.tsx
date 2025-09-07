@@ -25,20 +25,28 @@ function TemplatedEmail({
     mainContact
 }: TemplatedEmailProps) {
     const [showToast, setShowToast] = useState<boolean>(false);
+    const [toastMessage, setToastMessage] = useState<string>('');
     var valueProposition = selectedOpportunity?.custom_fields.find(cf => cf.custom_field_definition_id === 665684)?.value;
     var nearTermGrowth = selectedOpportunity?.custom_fields.find(cf => cf.custom_field_definition_id === 665692)?.value;
 
     const closeTemplatedEmail = () => {
         setIsModalOpen(false);
     }
+
     const removeRecipient = (e: React.MouseEvent<HTMLDivElement>) => {
         const target = e.target as HTMLDivElement;
         setEmailList(prevEmailList => {
             return prevEmailList.filter(listContact => listContact.id != Number(target.id));
         })
     }
+
     const handleCopied = (emailToCopy: string) => {
-        navigator.clipboard.writeText(emailToCopy)
+        navigator.clipboard.writeText(emailToCopy);
+        showToastAndTimeout('Email ');
+    }
+
+    const showToastAndTimeout = (prefix: string) => {
+        setToastMessage(`${prefix}Copied!`);
         setShowToast(true);
         setTimeout(() => setShowToast(false), 2000);
     }
@@ -106,7 +114,7 @@ function TemplatedEmail({
         return (
             <>
                 {selectedOpportunity?.details}
-                {selectedOpportunity?.details?.slice(-1) === "." || !selectedOpportunity?.details ? '' : '.'}
+                {selectedOpportunity?.details?.trim().slice(-1) === "." || !selectedOpportunity?.details ? '' : '.'}
                 {' '}
                 {
                     oppRoundSize && valuation && roundStructure && valuationType
@@ -144,13 +152,13 @@ function TemplatedEmail({
 
     return (
         <div className="modal-overlay" onClick={closeTemplatedEmail}>
-            {showToast ? <div className="toast">Copied!</div> : <></>  }
+            {showToast ? <div className="toast">{toastMessage}</div> : <></>  }
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>   
                 <div className="to-container">
                     <div>To:</div>
                     <div className="email-list-container">
                         {emailRecipients.map((recipient: Person) => (
-                            <div className={"email-recipient"}>
+                            <div key={`templated-email-recipient-${recipient.id}`} className={"email-recipient"}>
                                 <div className="recipient-name">{recipient.name}</div>
                                 <div className="copy-icon" onClick={() => handleCopied(recipient.email)}>
                                     <svg xmlns="http://www.w3.org/2000/svg" 
@@ -168,7 +176,8 @@ function TemplatedEmail({
                     </div>
                     <button className="copy-emails-button" 
                         onClick={() => {
-                            navigator.clipboard.writeText(emailRecipients.map(contact => contact.email).join('; '))
+                            navigator.clipboard.writeText(emailRecipients.map(contact => contact.email).join('; '));
+                            showToastAndTimeout('Emails ');
                         }}
                     >
                         Copy Emails
@@ -194,6 +203,7 @@ function TemplatedEmail({
                                     }),
                                 ]);
                             }
+                            showToastAndTimeout('Body ')
                         }}
                     >
                         Copy Body
